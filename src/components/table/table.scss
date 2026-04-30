@@ -1,0 +1,38 @@
+@use "../../scss/colors" as colors;
+
+.table {
+  &_th,
+  th {
+    text-transform: uppercase !important;
+    text-align: center;
+    color: colors.$grey1 !important;
+    font-weight: 500;
+    min-width: 13rem;
+    width: max-content;
+    white-space: pre;
+  }
+
+  tr,
+  .table_tr {
+    min-height: 100px;
+  }
+
+  // styling table row
+  > &_tr {
+    &:first-child,
+    &:last-child {
+      background-color: none !important;
+    }
+  }
+
+  // typing table data
+  &_td,
+  td {
+    text-align: center;
+    width: max-content;
+    input,
+    select {
+      text-align: center;
+    }
+  }
+}

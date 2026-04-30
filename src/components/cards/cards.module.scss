@@ -1,0 +1,33 @@
+@use "../../scss/colors" as colors;
+
+.card {
+  background: colors.$white;
+  padding: 1rem;
+  border: 1px solid colors.$light;
+  border-left: 5px solid colors.$primary;
+  border-radius: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &_img {
+    width: 45px;
+    height: 45px;
+    background: colors.$white;
+  }
+  &_text {
+    font-size: 1.2rem;
+    color: colors.$grey3;
+    text-transform: capitalize;
+  }
+  &_value {
+    &_pre {
+      margin-right: 0.5rem;
+    }
+    &_text {
+      font-weight: 500;
+      font-size: 1.2rem;
+      color: colors.$grey2;
+    }
+  }
+}

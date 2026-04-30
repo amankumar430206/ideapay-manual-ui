@@ -1,0 +1,6 @@
+const API_VERSION = process.env.REACT_APP_API_VERSION;
+
+export const BASE_URL = {
+  API: process.env.REACT_APP_API_CONTEXT + API_VERSION,
+  API_SUREPASS: process.env.REACT_APP_API_SUREPASS_CONTEXT,
+};

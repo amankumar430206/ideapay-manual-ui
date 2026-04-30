@@ -1,0 +1,17 @@
+//  map holding breakpoint values
+$screens-sizes: (
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px,
+);
+
+//  mixin to print out media queries (based on map keys passed)
+@mixin screen($keys...) {
+  @each $key in $keys {
+    @media (max-width: map-get($screens-sizes, $key)) {
+      @content;
+    }
+  }
+}

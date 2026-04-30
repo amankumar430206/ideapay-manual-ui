@@ -1,0 +1,164 @@
+@use "./colors" as colors;
+// form controls
+.form-control {
+  box-shadow: none;
+  border: none;
+  outline: none;
+}
+// offcanvas
+.offcanvas.drawer {
+  padding: 0.5rem;
+}
+
+.btn-primary {
+  color: #fff !important;
+}
+
+.form-label {
+  color: colors.$grey2;
+  &.required {
+    &::after {
+      content: " *";
+      color: colors.$danger;
+    }
+  }
+}
+
+.required {
+  &::after {
+    content: " *";
+    color: colors.$danger;
+  }
+}
+
+// remove icon from invalid class
+.is-invalid {
+  background-image: none !important;
+}
+
+// file upload
+
+.file,
+.file-upload {
+  width: 80px;
+  min-width: 80px;
+  height: 120px;
+  background: lighten(colors.$primary_light, $amount: 60);
+  outline-offset: 1px;
+  border-radius: 8px;
+  border: 2px solid colors.$white;
+  overflow: hidden;
+  &:hover {
+    outline: 3px solid lighten(colors.$danger, $amount: 30);
+  }
+  &:active {
+    outline: 3px solid colors.$danger;
+  }
+
+  > img {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+  }
+}
+
+.file-upload {
+  &:hover {
+    outline: 3px solid lighten(colors.$primary_light, $amount: 30);
+  }
+  &:active {
+    outline: 3px solid colors.$primary_light;
+  }
+}
+
+.file {
+  &-wrapper,
+  &-preview {
+    margin: 1rem 0;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  &-upload {
+    border: 2px dashed colors.$primary_light;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    // overflow: hidden;
+
+    p {
+      cursor: pointer;
+      font-size: 10px;
+      text-align: center;
+      font-weight: 500;
+      color: colors.$primary_light;
+    }
+
+    input {
+      cursor: pointer;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+    }
+  }
+}
+
+// dropdown cusrsor event
+.dropdown-item {
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  .dropdown-item {
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    &:hover {
+      border-left: 2px solid colors.$primary;
+    }
+  }
+}
+
+// action
+.action {
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.cursor {
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+*.action {
+  &:hover {
+    outline: 2px solid colors.$primary;
+  }
+}
+
+.text-shadow {
+  text-shadow: 4px 4px 8px rgba(2, 2, 2, 0.264);
+}
+
+.h-full {
+  min-height: 100vh;
+  height: 100%;
+}
+
+.page-content {
+  min-height: 60vh;
+}
+
+.table-responsive {
+  overflow-y: visible !important;
+}
+
+.table-responsive .dropdown,
+.table-responsive .btn-group,
+.table-responsive .btn-group-vertical {
+  position: static;
+}

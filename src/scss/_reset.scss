@@ -1,0 +1,49 @@
+@use "./colors" as colors;
+@import "./mixins/screens";
+@import "./mixins/scrollbar";
+
+// disable default icons on bootstrap
+// $enable-validation-icons: false;
+
+*,
+*::after,
+*::before {
+  padding: 0;
+  margin: 0;
+  box-sizing: inherit;
+  font-family: "Poppins", sans-serif !important;
+}
+
+* {
+  @include scrollbar;
+}
+
+*::selection {
+  background-color: colors.$primary !important;
+  color: colors.$white !important;
+}
+
+html {
+  font-size: 85%;
+  box-sizing: border-box;
+
+  @include screen(sm) {
+    font-size: 75%;
+  }
+}
+
+body {
+  width: 100%;
+  font-family: "Poppins", sans-serif !important;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
