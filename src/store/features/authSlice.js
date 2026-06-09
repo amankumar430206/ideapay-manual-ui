@@ -5,6 +5,8 @@ export const AUTH_LOCAL_VARIABLES = {
   active: "mnt-active",
   auth_token: "mnt-auth-token",
   user: "mnt-user",
+  permissions: "mnt-permissions",
+  permissionsConfigured: "mnt-permissions-configured",
 };
 
 const INITIAL_STATE = {
@@ -14,6 +16,12 @@ const INITIAL_STATE = {
   currentUserId: null,
   currentRole: null,
   isLoggedIn: false,
+  // Enabled permission ids for the current user's role.
+  permissions: secureLocalStorage.getItem(AUTH_LOCAL_VARIABLES.permissions) || null,
+  // Whether the role has an explicit permission document saved. When false the
+  // app stays permissive (legacy role behavior) to avoid lockouts pre-setup.
+  permissionsConfigured:
+    secureLocalStorage.getItem(AUTH_LOCAL_VARIABLES.permissionsConfigured) || false,
   form: {},
 };
 
@@ -39,6 +47,17 @@ const authSlice = createSlice({
     setCurrentRole: (state, { payload }) => {
       state.currentRole = payload;
     },
+    setPermissions: (state, { payload }) => {
+      const permissions = payload?.permissions || [];
+      const configured = !!payload?.configured;
+      state.permissions = permissions;
+      state.permissionsConfigured = configured;
+      secureLocalStorage.setItem(AUTH_LOCAL_VARIABLES.permissions, permissions);
+      secureLocalStorage.setItem(
+        AUTH_LOCAL_VARIABLES.permissionsConfigured,
+        configured
+      );
+    },
     setLoggedIn: (state, { payload }) => {
       state.isLoggedIn = payload;
     },
@@ -52,6 +71,8 @@ const authSlice = createSlice({
       state.currentUserId = null;
       state.currentRole = null;
       state.isLoggedIn = false;
+      state.permissions = null;
+      state.permissionsConfigured = false;
       secureLocalStorage.clear();
       sessionStorage.clear();
     },
@@ -68,5 +89,6 @@ export const {
   setFormFields,
   setCurrentUserId,
   setCurrentRole,
+  setPermissions,
 } = authSlice.actions;
 export default authSlice;

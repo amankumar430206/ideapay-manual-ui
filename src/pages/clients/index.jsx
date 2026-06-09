@@ -20,6 +20,8 @@ import { STATUS_ENUMS } from "../../consts/formValues";
 import { getFormValues } from "../../utils/utils";
 import { ROLES } from "../../consts/AppRoles";
 import { OnlyFor } from "../../components/Roles";
+import { Can } from "../../components/permission/Can";
+import { useCan } from "../../hooks/useCan";
 
 import { format } from "date-fns";
 import { DATE_FORMAT } from "../../consts/AppContants";
@@ -49,6 +51,7 @@ const filterOptions = [
 
 const Page = () => {
   const currentUser = useSelector((s) => s.auth.currentUser);
+  const can = useCan();
   const [currentRecord, setCurrentRecord] = useState(null);
   const [filter, setFilter] = useState(filterOptions[0]);
 
@@ -108,23 +111,27 @@ const Page = () => {
         <div className="d-flex justify-content-between align-items-center mt-3">
           <h3 className="fw-light">Clients</h3>
           <ButtonGroup>
-            <OnlyFor roles={[ROLES.SUPER]}>
+            <OnlyFor roles={[ROLES.SUPER, ROLES.ADMIN]}>
+              <Can perm="payments.transactions.create">
+                <Button
+                  className="btn btn-outline-primary"
+                  text={"+ Add Transaction"}
+                  onClick={() => {
+                    setCurrentRecord(null);
+                    setIsAddTransactionOpen(true);
+                  }}
+                />
+              </Can>
+            </OnlyFor>
+            <Can perm="clients.clients.create">
               <Button
-                className="btn btn-outline-primary"
-                text={"+ Add Transaction"}
+                className="btn btn-primary"
+                text={"+ Add Client"}
                 onClick={() => {
-                  setCurrentRecord(null);
-                  setIsAddTransactionOpen(true);
+                  setIsRegisterOpen(true);
                 }}
               />
-            </OnlyFor>
-            <Button
-              className="btn btn-primary"
-              text={"+ Add Client"}
-              onClick={() => {
-                setIsRegisterOpen(true);
-              }}
-            />
+            </Can>
           </ButtonGroup>
         </div>
       </Section>
@@ -224,22 +231,26 @@ const Page = () => {
                   />
                 </Data>
                 <Data>
-                  <Button
-                    disabled={!item.active}
-                    className="btn btn-light"
-                    text={" + Add Currency"}
-                    onClick={() => {
-                      setCurrentRecord(item);
-                      setIsAddAccountOpen(true);
-                    }}
-                  />
+                  <Can perm="accounts.accounts.create">
+                    <Button
+                      disabled={!item.active}
+                      className="btn btn-light"
+                      text={" + Add Currency"}
+                      onClick={() => {
+                        setCurrentRecord(item);
+                        setIsAddAccountOpen(true);
+                      }}
+                    />
+                  </Can>
                 </Data>
                 <Data>
                   <ActionMenu
                     options={[
                       {
                         name: "Add Transaction",
-                        show: currentUser?.role === ROLES.SUPER,
+                        show:
+                          [ROLES.SUPER, ROLES.ADMIN].includes(currentUser?.role) &&
+                          can("payments.transactions.create"),
                         onClick: () => {
                           setCurrentRecord(item);
                           setIsAddTransactionOpen(true);
@@ -248,8 +259,9 @@ const Page = () => {
                       {
                         name: "Approve",
                         show:
-                          !(item.status === STATUS_ENUMS.APPROVED) ||
-                          !item.businessDetails,
+                          (!(item.status === STATUS_ENUMS.APPROVED) ||
+                            !item.businessDetails) &&
+                          can("clients.clients.edit"),
                         onClick: () => {
                           setCurrentRecord(item);
                           handleStatusUpdate(item._id, STATUS_ENUMS.APPROVED);
@@ -257,7 +269,9 @@ const Page = () => {
                       },
                       {
                         name: "Reject",
-                        show: !(item.status === STATUS_ENUMS.REJECTED),
+                        show:
+                          !(item.status === STATUS_ENUMS.REJECTED) &&
+                          can("clients.clients.edit"),
                         onClick: () => {
                           setCurrentRecord(item);
                           handleStatusUpdate(item._id, STATUS_ENUMS.REJECTED);
@@ -265,7 +279,9 @@ const Page = () => {
                       },
                       {
                         name: "Block",
-                        show: !(item.status === STATUS_ENUMS.BLOCKED),
+                        show:
+                          !(item.status === STATUS_ENUMS.BLOCKED) &&
+                          can("clients.clients.edit"),
                         onClick: () => {
                           setCurrentRecord(item);
                           handleStatusUpdate(item._id, STATUS_ENUMS.BLOCKED);

@@ -2,20 +2,32 @@ import { useSelector } from "react-redux";
 import { ROUTES } from "../router/routes";
 import { permitUser } from "../components/Roles";
 import { ROLES } from "../consts/AppRoles";
+import { useCan } from "./useCan";
 
 export const useRoutes = () => {
   const currentUser = useSelector((state) => state.auth.currentUser);
+  const can = useCan();
+
+  // A nav item is visible only when the role allows it AND the role has the
+  // feature's "view" permission (the latter is a no-op until the role is
+  // configured, see useCan).
+  const showFor = (roles, perm) => permitUser(roles, currentUser?.role) && can(perm);
 
   const SUB_MENU = [
     {
+      name: "dashboard",
+      path: ROUTES.DASHBOARD.CLIENT_DASHBOARD.INDEX,
+      show: showFor([ROLES.ADMIN, ROLES.CLIENT, ROLES.USER], "overview.dashboard.view"),
+    },
+    {
       name: "clients",
       path: ROUTES.DASHBOARD.CLIENTS.INDEX,
-      show: permitUser([ROLES.ADMIN, ROLES.SUPER], currentUser?.role),
+      show: showFor([ROLES.ADMIN, ROLES.SUPER], "clients.clients.view"),
     },
     {
       name: "accounts",
       path: ROUTES.DASHBOARD.ACCOUNTS.INDEX,
-      show: permitUser([ROLES.ADMIN, ROLES.SUPER, ROLES.CLIENT, ROLES.USER], currentUser?.role),
+      show: showFor([ROLES.ADMIN, ROLES.SUPER, ROLES.CLIENT, ROLES.USER], "accounts.accounts.view"),
     },
     // {
     //   name: "cards",
@@ -39,7 +51,15 @@ export const useRoutes = () => {
     {
       name: "transactions",
       path: ROUTES.DASHBOARD.TRANSACTIONS.INDEX,
-      show: permitUser([ROLES.ADMIN, ROLES.SUPER, ROLES.CLIENT, ROLES.USER], currentUser?.role),
+      show: showFor(
+        [ROLES.ADMIN, ROLES.SUPER, ROLES.CLIENT, ROLES.USER],
+        "payments.transactions.view"
+      ),
+    },
+    {
+      name: "transaction requests",
+      path: ROUTES.DASHBOARD.REQUESTS.TRANSACTION_REQUESTS,
+      show: showFor([ROLES.SUPER], "payments.transaction_requests.view"),
     },
     {
       name: "reports",
@@ -95,9 +115,17 @@ export const useRoutes = () => {
     //   show: permitUser([ROLES.ADMIN, ROLES.SUPER, ROLES.CLIENT, ROLES.USER], currentUser?.role),
     // },
     {
+      name: "roles & permissions",
+      path: ROUTES.DASHBOARD.SETTINGS.ROLES_PERMISSIONS,
+      show: showFor([ROLES.SUPER], "administration.roles_permissions.view"),
+    },
+    {
       name: "profile",
       path: ROUTES.DASHBOARD.PROFILE.INDEX,
-      show: permitUser([ROLES.ADMIN, ROLES.SUPER, ROLES.CLIENT, ROLES.USER], currentUser?.role),
+      show: showFor(
+        [ROLES.ADMIN, ROLES.SUPER, ROLES.CLIENT, ROLES.USER],
+        "administration.profile_settings.view"
+      ),
     },
   ];
 

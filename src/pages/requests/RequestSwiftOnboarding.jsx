@@ -33,6 +33,7 @@ import { DATE_FORMAT } from "../../consts/AppContants";
 import { format } from "date-fns";
 import { StatusBadge } from "../../components/utils/StatusBadge";
 import { OnlyForAdmin, OnlyForUser, permitUser } from "../../components/Roles";
+import { useCan } from "../../hooks/useCan";
 import { StatusFilterOptions } from "../../consts/formValues";
 import { ViewPrefundRequestDrawer } from "./actions/ViewPrefundRequestDrawer";
 import { ApprovePrefundRequestDrawer } from "./actions/ApprovePrefundRequestDrawer";
@@ -43,6 +44,7 @@ export const RequestSwiftOnboarding = () => {
   const [currentRecord, setCurrentRecord] = useState(null);
   const [isViewOpen, setViewOpen] = useState(false);
   const [isApproveOpen, setApproveOpen] = useState(false);
+  const can = useCan();
 
   const currentUser = useSelector((s) => s.auth.currentUser);
 
@@ -185,7 +187,9 @@ export const RequestSwiftOnboarding = () => {
                           },
                           {
                             name: "Approve & Process",
-                            show: item.status === STATUS_ENUMS.PENDING,
+                            show:
+                              item.status === STATUS_ENUMS.PENDING &&
+                              can("requests.swift_onboarding_requests.approve"),
                             onClick: () => {
                               setCurrentRecord(item);
                               setApproveOpen(true);
@@ -193,7 +197,9 @@ export const RequestSwiftOnboarding = () => {
                           },
                           {
                             name: "Reject Request",
-                            show: item.status === STATUS_ENUMS.PENDING,
+                            show:
+                              item.status === STATUS_ENUMS.PENDING &&
+                              can("requests.swift_onboarding_requests.approve"),
                             onClick: () => {
                               handleStatusUpdate(
                                 item?._id,

@@ -32,6 +32,7 @@ import { DATE_FORMAT } from "../../consts/AppContants";
 import { format } from "date-fns";
 import { StatusBadge } from "../../components/utils/StatusBadge";
 import { OnlyForAdmin, OnlyForUser, permitUser } from "../../components/Roles";
+import { useCan } from "../../hooks/useCan";
 import { StatusFilterOptions } from "../../consts/formValues";
 import { toast } from "react-toastify";
 
@@ -41,6 +42,7 @@ const RequestAccountActivation = () => {
   const [currentRecord, setCurrentRecord] = useState(null);
 
   const currentUser = useSelector((s) => s.auth.currentUser);
+  const can = useCan();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState(StatusFilterOptions[0]);
@@ -229,7 +231,9 @@ const RequestAccountActivation = () => {
                         },
                         {
                           name: "Approve Request",
-                          show: item.status === STATUS_ENUMS.PENDING,
+                          show:
+                            item.status === STATUS_ENUMS.PENDING &&
+                            can("accounts.account_activation.approve"),
                           onClick: () => {
                             handleStatusUpdate(
                               item?._id,
@@ -239,7 +243,9 @@ const RequestAccountActivation = () => {
                         },
                         {
                           name: "Reject Request",
-                          show: item.status === STATUS_ENUMS.PENDING,
+                          show:
+                            item.status === STATUS_ENUMS.PENDING &&
+                            can("accounts.account_activation.approve"),
                           onClick: () => {
                             handleStatusUpdate(
                               item?._id,

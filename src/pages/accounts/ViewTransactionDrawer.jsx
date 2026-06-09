@@ -10,7 +10,7 @@ export const ViewTransactionDrawer = ({ onClose, data = {} }) => {
         width={700}
         noClose
       >
-        <ViewTransaction />
+        <ViewTransaction data={data} />
       </Drawer>
     </>
   );

@@ -12,6 +12,7 @@ import {
 import { ActionMenu } from "../../components/ActionMenu";
 import { PageContent } from "../../components/PageContent";
 import { OnlyForAdmin } from "../../components/Roles";
+import { useCan } from "../../hooks/useCan";
 import { Section } from "../../components/Section";
 import { Button } from "../../components/buttons/Button";
 import { Data, Row, Table } from "../../components/table/table";
@@ -31,6 +32,7 @@ const RequestCardPage = () => {
   const [isApproveOpen, setApproveOpen] = useState(false);
 
   const currentUser = useSelector((s) => s.auth.currentUser);
+  const can = useCan();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState(StatusFilterOptions[0]);
@@ -167,7 +169,9 @@ const RequestCardPage = () => {
                           },
                           {
                             name: "Approve & Process",
-                            show: item.status === STATUS_ENUMS.PENDING,
+                            show:
+                              item.status === STATUS_ENUMS.PENDING &&
+                              can("requests.card_requests.approve"),
                             onClick: () => {
                               handleStatusUpdate(
                                 item?._id,
@@ -177,7 +181,9 @@ const RequestCardPage = () => {
                           },
                           {
                             name: "Reject Request",
-                            show: item.status === STATUS_ENUMS.PENDING,
+                            show:
+                              item.status === STATUS_ENUMS.PENDING &&
+                              can("requests.card_requests.approve"),
                             onClick: () => {
                               handleStatusUpdate(
                                 item?._id,

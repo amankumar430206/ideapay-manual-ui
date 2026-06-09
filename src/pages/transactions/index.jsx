@@ -14,6 +14,7 @@ import { DATE_FORMAT } from "../../consts/AppContants";
 import AddTransactionDrawer from "../clients/actions/AddTransactionDrawer";
 import { ROLES } from "../../consts/AppRoles";
 import { OnlyFor } from "../../components/Roles";
+import { Can } from "../../components/permission/Can";
 import { ExportDownload } from "../../components/export/ExportDownload";
 import { useSelector } from "react-redux";
 
@@ -116,6 +117,8 @@ const TransactionsPage = () => {
     if (transactionId) q.transactionId = transactionId;
     if (dateFrom) q.dateFrom = dateFrom;
     if (dateTo) q.dateTo = dateTo;
+    // Only show approved transactions on the main transactions page
+    q.status = "approved";
     return { query: q, page, limit, populate: ["senderAccountId", "receiverAccountId"] };
   };
 
@@ -169,31 +172,35 @@ const TransactionsPage = () => {
             <p className="text-muted small mb-0">{query.data?.content?.length ?? 0} records</p>
           </div>
           <ButtonGroup>
-            <OnlyFor roles={[ROLES.SUPER]}>
-              <Button
-                className="btn btn-primary"
-                text="+ Add Transaction"
-                onClick={() => {
-                  setCurrentRecord(null);
-                  setIsAddTransactionOpen(true);
-                }}
-              />
+            <OnlyFor roles={[ROLES.SUPER, ROLES.ADMIN]}>
+              <Can perm="payments.transactions.create">
+                <Button
+                  className="btn btn-primary"
+                  text="+ Add Transaction"
+                  onClick={() => {
+                    setCurrentRecord(null);
+                    setIsAddTransactionOpen(true);
+                  }}
+                />
+              </Can>
             </OnlyFor>
 
-            <ExportDownload
-              buttonVariant="secondary"
-              label="Export Data"
-              data={query.data?.content}
-              filename={`transaction-report_${dateFrom}_${dateTo}`}
-              pdfExportConfig={pdfExportConfig}
-              meta={{
-                accountName: currentUser?.firstName,
-                accountId: currentUser?.userId,
-                fromDate: dateFrom,
-                toDate: dateTo,
-                reportName: "Transaction Report",
-              }}
-            />
+            <Can perm="payments.transactions.export">
+              <ExportDownload
+                buttonVariant="secondary"
+                label="Export Data"
+                data={query.data?.content}
+                filename={`transaction-report_${dateFrom}_${dateTo}`}
+                pdfExportConfig={pdfExportConfig}
+                meta={{
+                  accountName: currentUser?.firstName,
+                  accountId: currentUser?.userId,
+                  fromDate: dateFrom,
+                  toDate: dateTo,
+                  reportName: "Transaction Report",
+                }}
+              />
+            </Can>
           </ButtonGroup>
         </div>
       </Section>
@@ -355,9 +362,14 @@ const TransactionsPage = () => {
 
               {/* Transaction ID */}
               <Data>
-                <span className="text-primary fw-semibold user-select-all small">
+                <span className="text-primary fw-semibold user-select-all small d-block">
                   {item.transactionId || item._id || "—"}
                 </span>
+                {item.verified && (
+                  <span className="badge bg-success-subtle text-success border border-success-subtle small mt-1">
+                    ✓ Verified
+                  </span>
+                )}
               </Data>
 
               {/* Type */}
@@ -469,8 +481,10 @@ const TransactionsPage = () => {
 
               {/* Actions */}
               <Data>
-                <OnlyFor roles={[ROLES.SUPER]}>
-                  <Button className="btn btn-outline-primary btn-sm px-3" text="Edit" onClick={() => openEdit(item)} />
+                <OnlyFor roles={[ROLES.SUPER, ROLES.ADMIN]}>
+                  <Can perm="payments.transactions.edit">
+                    <Button className="btn btn-outline-primary btn-sm px-3" text="Edit" onClick={() => openEdit(item)} />
+                  </Can>
                 </OnlyFor>
               </Data>
             </Row>

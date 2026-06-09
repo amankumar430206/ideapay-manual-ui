@@ -13,6 +13,7 @@ import { CardsPage } from "../pages/cards";
 import AppLayoutLoader from "../components/loaders/AppLayoutLoader";
 import PageContentLoader from "../components/loaders/PageContentLoader";
 import LogoutPage from "../pages/auth/Logout";
+import { RequirePermission } from "../components/permission/RequirePermission";
 
 const ClientsPage = lazy(() => import("../pages/clients"));
 const AccountsPage = lazy(() => import("../pages/accounts"));
@@ -34,11 +35,14 @@ const RequestSwiftOnboardPage = lazy(() => import("../pages/requests/RequestSwif
 const RequestAccountActivationPge = lazy(() => import("../pages/requests/RequestAccountActivation"));
 
 const RequestCardPage = lazy(() => import("../pages/requests/RequestCards"));
+const RequestTransactionsPage = lazy(() => import("../pages/requests/RequestTransactions"));
 
+const ClientDashboardPage = lazy(() => import("../pages/dashboard/ClientDashboard"));
 const ReportsAccountPage = lazy(() => import("../pages/reports/ReportsAccounts"));
 const ReportsAllAccountPage = lazy(() => import("../pages/reports/ReportsAllAccounts"));
 const ReportsBalancesPage = lazy(() => import("../pages/reports/ReportsBalances"));
 const ProfilePage = lazy(() => import("../pages/settings/Profile"));
+const RolesPermissionsPage = lazy(() => import("../pages/settings/RolesPermissions"));
 
 export const AppRouter = createBrowserRouter([
   {
@@ -106,10 +110,20 @@ export const AppRouter = createBrowserRouter([
     ),
     children: [
       {
+        path: ROUTES.DASHBOARD.CLIENT_DASHBOARD.INDEX,
+        element: (
+          <Suspense fallback={<PageContentLoader />}>
+            <ClientDashboardPage />
+          </Suspense>
+        ),
+      },
+      {
         path: ROUTES.DASHBOARD.CLIENTS.INDEX,
         element: (
           <Suspense fallback={<PageContentLoader />}>
-            <ClientsPage />
+            <RequirePermission perm="clients.clients.view">
+              <ClientsPage />
+            </RequirePermission>
           </Suspense>
         ),
       },
@@ -117,7 +131,9 @@ export const AppRouter = createBrowserRouter([
         path: ROUTES.DASHBOARD.ACCOUNTS.INDEX,
         element: (
           <Suspense fallback={<PageContentLoader />}>
-            <AccountsPage />
+            <RequirePermission perm="accounts.accounts.view">
+              <AccountsPage />
+            </RequirePermission>
           </Suspense>
         ),
       },
@@ -187,6 +203,16 @@ export const AppRouter = createBrowserRouter([
             path: ROUTES.DASHBOARD.REQUESTS.CARDS,
             element: <RequestCardPage />,
           },
+          {
+            path: ROUTES.DASHBOARD.REQUESTS.TRANSACTION_REQUESTS,
+            element: (
+              <Suspense fallback={<PageContentLoader />}>
+                <RequirePermission perm="payments.transaction_requests.view">
+                  <RequestTransactionsPage />
+                </RequirePermission>
+              </Suspense>
+            ),
+          },
         ],
       },
       {
@@ -227,13 +253,25 @@ export const AppRouter = createBrowserRouter([
         path: ROUTES.DASHBOARD.TRANSACTIONS.INDEX,
         element: (
           <Suspense fallback={<PageContentLoader />}>
-            <TransactionsPage />
+            <RequirePermission perm="payments.transactions.view">
+              <TransactionsPage />
+            </RequirePermission>
           </Suspense>
         ),
       },
       {
         path: ROUTES.DASHBOARD.PROFILE.INDEX,
         element: <ProfilePage />,
+      },
+      {
+        path: ROUTES.DASHBOARD.SETTINGS.ROLES_PERMISSIONS,
+        element: (
+          <Suspense fallback={<PageContentLoader />}>
+            <RequirePermission perm="administration.roles_permissions.view">
+              <RolesPermissionsPage />
+            </RequirePermission>
+          </Suspense>
+        ),
       },
     ],
   },

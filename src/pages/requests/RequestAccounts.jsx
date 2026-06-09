@@ -30,6 +30,7 @@ import { DATE_FORMAT } from "../../consts/AppContants";
 import { format } from "date-fns";
 import { StatusBadge } from "../../components/utils/StatusBadge";
 import { OnlyForAdmin, OnlyForUser, permitUser } from "../../components/Roles";
+import { useCan } from "../../hooks/useCan";
 import { StatusFilterOptions } from "../../consts/formValues";
 
 export const RequestAccountsPage = () => {
@@ -38,6 +39,7 @@ export const RequestAccountsPage = () => {
   const [currentRecord, setCurrentRecord] = useState(null);
 
   const currentUser = useSelector((s) => s.auth.currentUser);
+  const can = useCan();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState(StatusFilterOptions[0]);
@@ -204,7 +206,9 @@ export const RequestAccountsPage = () => {
                         },
                         {
                           name: "Approve & Process",
-                          show: item.status === STATUS_ENUMS.PENDING,
+                          show:
+                            item.status === STATUS_ENUMS.PENDING &&
+                            can("requests.transfer_account_requests.approve"),
                           onClick: () => {
                             AccountTransaction.mutate({
                               transactionId: item._id,
@@ -213,7 +217,9 @@ export const RequestAccountsPage = () => {
                         },
                         {
                           name: "Reject Request",
-                          show: item.status !== STATUS_ENUMS.REJECTED,
+                          show:
+                            item.status !== STATUS_ENUMS.REJECTED &&
+                            can("requests.transfer_account_requests.approve"),
                           onClick: () => {
                             handleStatusUpdate(
                               item?._id,

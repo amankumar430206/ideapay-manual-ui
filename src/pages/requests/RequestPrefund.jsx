@@ -36,6 +36,7 @@ import { OnlyForAdmin, OnlyForUser, permitUser } from "../../components/Roles";
 import { StatusFilterOptions } from "../../consts/formValues";
 import { ViewPrefundRequestDrawer } from "./actions/ViewPrefundRequestDrawer";
 import { ApprovePrefundRequestDrawer } from "./actions/ApprovePrefundRequestDrawer";
+import { useCan } from "../../hooks/useCan";
 
 export const RequestAccountsPage = () => {
   const location = useLocation();
@@ -45,6 +46,7 @@ export const RequestAccountsPage = () => {
   const [isApproveOpen, setApproveOpen] = useState(false);
 
   const currentUser = useSelector((s) => s.auth.currentUser);
+  const can = useCan();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState(StatusFilterOptions[0]);
@@ -199,7 +201,9 @@ export const RequestAccountsPage = () => {
                           },
                           {
                             name: "Approve & Process",
-                            show: item.status === STATUS_ENUMS.PENDING,
+                            show:
+                              item.status === STATUS_ENUMS.PENDING &&
+                              can("requests.prefund_requests.approve"),
                             onClick: () => {
                               setCurrentRecord(item);
                               setApproveOpen(true);
@@ -207,7 +211,9 @@ export const RequestAccountsPage = () => {
                           },
                           {
                             name: "Reject Request",
-                            show: item.status === STATUS_ENUMS.PENDING,
+                            show:
+                              item.status === STATUS_ENUMS.PENDING &&
+                              can("requests.prefund_requests.approve"),
                             onClick: () => {
                               handleStatusUpdate(
                                 item?._id,

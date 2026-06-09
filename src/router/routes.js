@@ -22,6 +22,10 @@ export const ROUTES = {
   DASHBOARD: {
     INDEX: DASHBOARD_BASE,
 
+    CLIENT_DASHBOARD: {
+      INDEX: DASHBOARD_BASE + "/home",
+    },
+
     CLIENTS: {
       INDEX: DASHBOARD_BASE + "/clients",
     },
@@ -70,6 +74,7 @@ export const ROUTES = {
       SWIFT_ONBOARD: DASHBOARD_BASE + "/requests/swift/onboarding",
       ACCOUNT_ACTIVATION: DASHBOARD_BASE + "/requests/accounts/activation",
       CARDS: DASHBOARD_BASE + "/requests/cards",
+      TRANSACTION_REQUESTS: DASHBOARD_BASE + "/requests/transactions",
     },
 
     SWIFT: {
@@ -88,6 +93,10 @@ export const ROUTES = {
       ACCOUNT: DASHBOARD_BASE + "/profile/accounts",
       ALL_ACCOUNT: DASHBOARD_BASE + "/profile/accounts/all",
       BALANCES: DASHBOARD_BASE + "/profile/accounts/balances",
+    },
+
+    SETTINGS: {
+      ROLES_PERMISSIONS: DASHBOARD_BASE + "/settings/roles-permissions",
     },
   },
 };

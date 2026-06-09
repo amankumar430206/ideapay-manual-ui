@@ -57,10 +57,19 @@ export const API_URL = {
   SWIFT_REGISTRATION: "/users/register/swift",
 
   // manual transactions
+  TRANSACTIONS_MANUAL_OTP_SEND: "/transactions/manual/otp/send",
   TRANSACTIONS_MANUAL_CREATE: "/transactions/manual/create",
   TRANSACTIONS_MANUAL_FIND: "/transactions/manual/find",
   TRANSACTIONS_MANUAL_EDIT: "/transactions/manual/edit",
+  TRANSACTIONS_MANUAL_REQUEST: "/transactions/manual/request",
+  TRANSACTIONS_MANUAL_REQUESTS_LIST: "/transactions/manual/requests/list",
+  TRANSACTIONS_MANUAL_REQUESTS_UPDATE: "/transactions/manual/requests/update",
 
   // Sureapass API
   SUREPASS_VERIFY_PASSPORT: "/ocr/international-passport-v2",
+
+  // roles & permissions
+  ROLES_PERMISSIONS_LIST: "/roles/permissions/list",
+  ROLES_PERMISSIONS_ME: "/roles/permissions/me",
+  ROLES_PERMISSIONS_UPDATE: "/roles/permissions/update",
 };

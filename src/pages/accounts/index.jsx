@@ -15,6 +15,8 @@ import Stepper from "react-stepper-horizontal";
 import { fetchAccountStats } from "../../api/api-service";
 import { OnlyInMobile, OnlyInPc } from "../../components/Responsive";
 import { OnlyFor, OnlyForAdmin, OnlyForUser, permitUser } from "../../components/Roles";
+import { Can } from "../../components/permission/Can";
+import { useCan } from "../../hooks/useCan";
 import { Spinner } from "../../components/spinner";
 import { StatusBadge } from "../../components/utils/StatusBadge";
 import { ROLES } from "../../consts/AppRoles";
@@ -36,9 +38,11 @@ import KYCFormDrawer from "./actions/KYCFormDrawer";
 import UpdateBalanceDrawer from "./actions/UpdateBalanceDrawer";
 import UploadReceiptDrawer from "./actions/UploadReceiptDrawer";
 import ViewAccountDrawer from "./actions/ViewAccountDrawer";
+import RequestTransactionDrawer from "./actions/RequestTransactionDrawer";
 
 export const AccountsPage = () => {
   const currentUser = useSelector((s) => s.auth.currentUser);
+  const can = useCan();
   const [currentRecord, setCurrentRecord] = useState(null);
 
   // choose the current account on view
@@ -58,6 +62,7 @@ export const AccountsPage = () => {
   const [isEditBalanceOpen, setIsEditBalanceOpen] = useState(false);
   const [isKYCFormOpen, setKYCFormOpen] = useState(false);
   const [isViewAccountOpen, setIsViewAccountOpen] = useState(false);
+  const [isRequestTransactionOpen, setIsRequestTransactionOpen] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -195,7 +200,7 @@ export const AccountsPage = () => {
 
       <Section>
         <div className="d-flex justify-content-between align-items-center mt-3">
-          <h3 className="fw-light">Account</h3>
+          <h3 className="fw-light">Account & Balances</h3>
 
           <OnlyInMobile>
             <ButtonGroup>
@@ -240,7 +245,9 @@ export const AccountsPage = () => {
                 options={[
                   {
                     name: "Activate Account",
-                    show: currentUser?.role === ROLES.USER,
+                    show:
+                      currentUser?.role === ROLES.USER &&
+                      can("accounts.accounts.edit"),
                     onClick: () => {
                       setCurrentRecord(currentUser);
                       setisActivateAccountOpen(true);
@@ -248,6 +255,7 @@ export const AccountsPage = () => {
                   },
                   {
                     name: "+ Add Account",
+                    show: can("accounts.accounts.create"),
                     onClick: () => {
                       if (currentUser.role !== ROLES.ADMIN) setCurrentRecord(currentUser);
                       setIsAddAccountOpen(true);
@@ -281,8 +289,16 @@ export const AccountsPage = () => {
                 />
               </OnlyForUser>
 
+              <Can perm="payments.transaction_requests.create">
+                <Button
+                  className="btn btn-light"
+                  text={"+ Payment Request"}
+                  onClick={() => setIsRequestTransactionOpen(true)}
+                />
+              </Can>
+
               {/* transfer */}
-              <ActionMenu
+              {/* <ActionMenu
                 disabled={!currentUser?.active}
                 name="Transfer"
                 options={[
@@ -301,16 +317,18 @@ export const AccountsPage = () => {
                     },
                   },
                 ]}
-              />
-              <Button
-                disabled={!currentUser?.active}
-                className="btn btn-primary"
-                text={"+ Add Account"}
-                onClick={() => {
-                  if (currentUser.role !== ROLES.ADMIN) setCurrentRecord(currentUser);
-                  setIsAddAccountOpen(true);
-                }}
-              />
+              /> */}
+              <Can perm="accounts.accounts.create">
+                <Button
+                  disabled={!currentUser?.active}
+                  className="btn btn-primary"
+                  text={"+ Add Account"}
+                  onClick={() => {
+                    if (currentUser.role !== ROLES.ADMIN) setCurrentRecord(currentUser);
+                    setIsAddAccountOpen(true);
+                  }}
+                />
+              </Can>
               <OnlyForUser role={currentUser?.role}>
                 <Button
                   show={false}
@@ -429,7 +447,8 @@ export const AccountsPage = () => {
                         name: "Activate Account",
                         show:
                           item.status !== STATUS_ENUMS.ACTIVE &&
-                          permitUser([ROLES.ADMIN, ROLES.USER, ROLES.SUPER, ROLES.CLIENT], currentUser?.role),
+                          permitUser([ROLES.ADMIN, ROLES.USER, ROLES.SUPER, ROLES.CLIENT], currentUser?.role) &&
+                          can("accounts.accounts.edit"),
                         onClick: () => {
                           setCurrentRecord(item);
                           setisActivateAccountOpen(true);
@@ -437,7 +456,10 @@ export const AccountsPage = () => {
                       },
                       {
                         name: "Update Balance",
-                        show: item.status === STATUS_ENUMS.ACTIVE && permitUser([ROLES.ADMIN], currentUser?.role),
+                        show:
+                          item.status === STATUS_ENUMS.ACTIVE &&
+                          permitUser([ROLES.ADMIN], currentUser?.role) &&
+                          can("accounts.accounts.edit"),
                         onClick: () => {
                           setCurrentRecord(item);
                           setIsEditBalanceOpen(true);
@@ -519,12 +541,9 @@ export const AccountsPage = () => {
         />
       )}
 
-      {isViewAccountOpen && (
-        <ViewAccountDrawer
-          data={currentRecord}
-          onClose={() => setIsViewAccountOpen(false)}
-        />
-      )}
+      {isViewAccountOpen && <ViewAccountDrawer data={currentRecord} onClose={() => setIsViewAccountOpen(false)} />}
+
+      {isRequestTransactionOpen && <RequestTransactionDrawer onClose={() => setIsRequestTransactionOpen(false)} />}
 
       {/* Transfer Actions */}
       {isTransferAccountsOpen && (
@@ -680,7 +699,7 @@ const Statistics = ({ data, loading, accountData = [] }) => {
         </>
       ) : (
         <>
-          <Section>
+          {/* <Section>
             <div className="row gy-3">
               <OnlyForUser role={currentUser?.role}>
                 <div className="col-sm-12 col-md-6 col-lg-3">
@@ -708,7 +727,101 @@ const Statistics = ({ data, loading, accountData = [] }) => {
                 </div>
               </OnlyForAdmin>
             </div>
-          </Section>
+          </Section> */}
+
+          <OnlyFor roles={[ROLES.CLIENT, ROLES.ADMIN, ROLES.USER]}>
+            {accountData.length > 0 && (
+              <Section className="mt-4">
+                <div className="row gy-3">
+                  {accountData.map((acc, i) => {
+                    const gradients = [
+                      "linear-gradient(135deg, #1F0751 0%, #3d1a8e 100%)",
+                      "linear-gradient(135deg, #0f4c81 0%, #1a7abf 100%)",
+                      "linear-gradient(135deg, #1a5c3a 0%, #27ae60 100%)",
+                      "linear-gradient(135deg, #7b2d00 0%, #d35400 100%)",
+                    ];
+                    const bg = gradients[i % gradients.length];
+                    return (
+                      <div key={acc._id} className="col-sm-12 col-md-6 col-lg-4">
+                        <div
+                          className="card border-0 h-100 overflow-hidden"
+                          style={{ background: bg, borderRadius: 12, minHeight: 120 }}
+                        >
+                          <div className="card-body d-flex flex-column justify-content-between p-3">
+                            <div className="d-flex justify-content-between align-items-center">
+                              <div>
+                                <p
+                                  className="mb-0 text-white-50 text-uppercase"
+                                  style={{ letterSpacing: "0.08em", fontSize: "0.62rem" }}
+                                >
+                                  {acc.accountType || "Account"}
+                                </p>
+                                <p className="mb-0 fw-semibold text-white" style={{ fontSize: "0.82rem" }}>
+                                  {acc.accountName}
+                                </p>
+                              </div>
+                              <span
+                                style={{
+                                  fontSize: "0.6rem",
+                                  background: acc.status === "active" ? "rgba(255,255,255,0.2)" : "rgba(255,193,7,0.3)",
+                                  color: "#fff",
+                                  border: "1px solid rgba(255,255,255,0.3)",
+                                  textTransform: "uppercase",
+                                  letterSpacing: "0.05em",
+                                  padding: "2px 7px",
+                                  borderRadius: 20,
+                                }}
+                              >
+                                {acc.status}
+                              </span>
+                            </div>
+
+                            <div className="mt-2">
+                              <p
+                                className="mb-0 text-white-50"
+                                style={{ fontSize: "0.62rem", letterSpacing: "0.06em", textTransform: "uppercase" }}
+                              >
+                                Available Balance
+                              </p>
+                              <h5
+                                className="fw-bold text-white mb-0"
+                                style={{ fontSize: "1.2rem", letterSpacing: "-0.3px" }}
+                              >
+                                {acc.currency} {formatAmount(acc.balance)}
+                              </h5>
+                            </div>
+
+                            <div
+                              className="d-flex align-items-center gap-2 mt-2 pt-2"
+                              style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}
+                            >
+                              <span
+                                className="text-white-50"
+                                style={{ fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase" }}
+                              >
+                                Account No.
+                              </span>
+                              <span className="text-white fw-semibold user-select-all" style={{ fontSize: "0.8rem" }}>
+                                {acc.accountNo}
+                              </span>
+                              {acc.bankName && (
+                                <span
+                                  className="ms-auto text-white-50 text-truncate"
+                                  style={{ maxWidth: 120, fontSize: "0.7rem" }}
+                                >
+                                  {acc.bankName}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Section>
+            )}
+          </OnlyFor>
         </>
       )}
     </>

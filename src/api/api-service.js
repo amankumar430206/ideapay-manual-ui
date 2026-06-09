@@ -250,6 +250,11 @@ export const UpdateCardRequestStatus = async (payload) => {
   return res.data;
 };
 
+export const sendManualTransactionOtp = async (payload) => {
+  const res = await ApiService.post(API_URL.TRANSACTIONS_MANUAL_OTP_SEND, payload);
+  return res.data;
+};
+
 export const createManualTransaction = async (payload) => {
   const res = await ApiService.post(API_URL.TRANSACTIONS_MANUAL_CREATE, payload);
   return res.data;
@@ -262,6 +267,37 @@ export const fetchManualTransactions = async (payload) => {
 
 export const editManualTransaction = async (payload) => {
   const res = await ApiService.post(API_URL.TRANSACTIONS_MANUAL_EDIT, payload);
+  return res.data;
+};
+
+export const createTransactionRequest = async (payload) => {
+  const res = await ApiService.post(API_URL.TRANSACTIONS_MANUAL_REQUEST, payload);
+  return res.data;
+};
+
+export const fetchTransactionRequests = async (payload) => {
+  const res = await ApiService.post(API_URL.TRANSACTIONS_MANUAL_REQUESTS_LIST, payload);
+  return res.data;
+};
+
+export const updateTransactionRequestStatus = async (payload) => {
+  const res = await ApiService.post(API_URL.TRANSACTIONS_MANUAL_REQUESTS_UPDATE, payload);
+  return res.data;
+};
+
+// roles & permissions
+export const fetchRolePermissions = async () => {
+  const res = await ApiService.post(API_URL.ROLES_PERMISSIONS_LIST, {});
+  return res.data;
+};
+
+export const updateRolePermissions = async (payload) => {
+  const res = await ApiService.post(API_URL.ROLES_PERMISSIONS_UPDATE, payload);
+  return res.data;
+};
+
+export const fetchMyPermissions = async () => {
+  const res = await ApiService.post(API_URL.ROLES_PERMISSIONS_ME, {});
   return res.data;
 };
 

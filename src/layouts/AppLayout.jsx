@@ -5,8 +5,12 @@ import { SubNavbar } from "../components/SubNavbar";
 import { AuthGuard } from "../components/AuthGuard";
 import { SessionTimer } from "../components/SessionTimer";
 import Footer from "../components/Footer";
+import { useLoadPermissions } from "../hooks/useLoadPermissions";
 
 export const AppLayout = () => {
+  // Hydrate the current user's role permissions into the store.
+  useLoadPermissions();
+
   return (
     <>
       <AuthGuard>
