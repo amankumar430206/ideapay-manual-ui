@@ -322,10 +322,17 @@ export const ManualTransactionForm = ({ data, onClose }) => {
 
           {/* Description */}
           <div className="col-12">
-            <label htmlFor="description" className="form-label">
+            <label htmlFor="description" className="form-label required">
               Description
             </label>
-            <textarea id="description" rows={2} maxLength={255} className="form-control" {...register("description")} />
+            <textarea
+              id="description"
+              rows={2}
+              maxLength={255}
+              className={`form-control ${errors?.description && "is-invalid"}`}
+              {...register("description", { required: { value: true, message: "Required Field" } })}
+            />
+            <div className="invalid-feedback">{errors?.description?.message}</div>
           </div>
 
           {/* ── Amount & Fees ── */}
