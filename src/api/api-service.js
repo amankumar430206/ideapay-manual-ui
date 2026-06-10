@@ -97,6 +97,11 @@ export const UpdateUserStatus = async (payload) => {
   return res.data;
 };
 
+export const UpdateUserRole = async (payload) => {
+  const res = await ApiService.post(`${API_URL.USERS_UPDATE_ROLE}`, payload);
+  return res.data;
+};
+
 export const UpdateAccBalance = async ({ accountId = "", balance }) => {
   const res = await ApiService.post(`${API_URL.ACCOUNTS_UPDATE_BALANCE}`, {
     accountId,

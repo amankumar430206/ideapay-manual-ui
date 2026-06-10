@@ -22,7 +22,8 @@ export const useRoutes = () => {
     {
       name: "clients",
       path: ROUTES.DASHBOARD.CLIENTS.INDEX,
-      show: showFor([ROLES.ADMIN, ROLES.SUPER], "clients.clients.view"),
+      // SUPER only — admin cannot view the clients page
+      show: showFor([ROLES.SUPER], "clients.clients.view"),
     },
     {
       name: "accounts",
@@ -59,7 +60,8 @@ export const useRoutes = () => {
     {
       name: "transaction requests",
       path: ROUTES.DASHBOARD.REQUESTS.TRANSACTION_REQUESTS,
-      show: showFor([ROLES.SUPER], "payments.transaction_requests.view"),
+      // Admin sees transaction requests like super admin (no permission required)
+      show: permitUser([ROLES.SUPER, ROLES.ADMIN], currentUser?.role),
     },
     {
       name: "reports",

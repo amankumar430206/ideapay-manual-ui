@@ -12,7 +12,7 @@ import {
 } from "../../api/api-service";
 import { CURRENCIES } from "../../consts/formValues";
 import { ROLES } from "../../consts/AppRoles";
-import { OTP_BYPASS_PERMISSION } from "../../consts/Permissions";
+import { OTP_REQUIRE_PERMISSION } from "../../consts/Permissions";
 
 const isEditMode = (data) => !!data?.transactionId;
 
@@ -32,14 +32,13 @@ export const ManualTransactionForm = ({ data, onClose }) => {
   const currentUser = useSelector((s) => s.auth.currentUser);
   const permissions = useSelector((s) => s.auth.permissions);
 
-  // A role skips payment OTP only if it's SUPER or has been explicitly granted
-  // the bypass permission (strict check — no permissive fallback, so OTP is the
-  // safe default for unconfigured roles).
-  const canBypassOtp =
-    currentUser?.role === ROLES.SUPER ||
-    (Array.isArray(permissions) && permissions.includes(OTP_BYPASS_PERMISSION));
-
-  const requiresOtp = !editMode && !canBypassOtp;
+  // OTP is required only when the role has the "Require OTP" permission checked.
+  // SUPER never needs OTP. Unchecked/absent => OTP bypassed.
+  const requiresOtp =
+    !editMode &&
+    currentUser?.role !== ROLES.SUPER &&
+    Array.isArray(permissions) &&
+    permissions.includes(OTP_REQUIRE_PERMISSION);
 
   // "form" → fill details, "verify" → enter emailed OTP (create flow only)
   const [step, setStep] = useState("form");

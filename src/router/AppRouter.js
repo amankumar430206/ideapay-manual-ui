@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import { ROUTES } from "../router/routes";
+import { ROLES } from "../consts/AppRoles";
 import { BlankLayout } from "../layouts/BlankLayout";
 import { AppLayout } from "../layouts/AppLayout";
 
@@ -121,7 +122,7 @@ export const AppRouter = createBrowserRouter([
         path: ROUTES.DASHBOARD.CLIENTS.INDEX,
         element: (
           <Suspense fallback={<PageContentLoader />}>
-            <RequirePermission perm="clients.clients.view">
+            <RequirePermission roles={[ROLES.SUPER]}>
               <ClientsPage />
             </RequirePermission>
           </Suspense>
@@ -207,7 +208,7 @@ export const AppRouter = createBrowserRouter([
             path: ROUTES.DASHBOARD.REQUESTS.TRANSACTION_REQUESTS,
             element: (
               <Suspense fallback={<PageContentLoader />}>
-                <RequirePermission perm="payments.transaction_requests.view">
+                <RequirePermission roles={[ROLES.SUPER, ROLES.ADMIN]}>
                   <RequestTransactionsPage />
                 </RequirePermission>
               </Suspense>

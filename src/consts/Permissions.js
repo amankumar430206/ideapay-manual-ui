@@ -7,7 +7,7 @@ export const ACTIONS = {
   DELETE: "delete",
   APPROVE: "approve",
   EXPORT: "export",
-  BYPASS: "bypass",
+  REQUIRE: "require",
 };
 
 export const ACTION_LABELS = {
@@ -17,7 +17,7 @@ export const ACTION_LABELS = {
   [ACTIONS.DELETE]: "Delete",
   [ACTIONS.APPROVE]: "Approve",
   [ACTIONS.EXPORT]: "Export",
-  [ACTIONS.BYPASS]: "Bypass OTP",
+  [ACTIONS.REQUIRE]: "Require OTP",
 };
 
 // App features grouped by module, each with the actions it supports.
@@ -102,8 +102,8 @@ export const PERMISSION_GROUPS = [
         key: "payment_otp",
         name: "Payment OTP",
         description:
-          "When enabled, this role skips email OTP verification when submitting a manual payment.",
-        actions: [ACTIONS.BYPASS],
+          "When checked, this role must verify via an emailed OTP before submitting a payment. If left unchecked, OTP verification is bypassed for this role.",
+        actions: [ACTIONS.REQUIRE],
       },
     ],
   },
@@ -198,8 +198,9 @@ export const PERMISSION_GROUPS = [
 export const permissionId = (groupKey, featureKey, action) =>
   `${groupKey}.${featureKey}.${action}`;
 
-// Permission that lets a role skip payment OTP verification.
-export const OTP_BYPASS_PERMISSION = "payments.payment_otp.bypass";
+// Permission that REQUIRES a role to verify payment via emailed OTP.
+// Unchecked (absent) => OTP is bypassed for that role.
+export const OTP_REQUIRE_PERMISSION = "payments.payment_otp.require";
 
 // Groups/features not marked `hidden`. Drives the management UI so hidden
 // items (e.g. cards, card requests, swift) don't show up but can be brought
@@ -238,6 +239,7 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     ...pids("payments", "transactions", [A.VIEW, A.CREATE, A.EDIT, A.APPROVE, A.EXPORT]),
     ...pids("payments", "transaction_requests", [A.VIEW, A.APPROVE]),
     ...pids("payments", "transfers", [A.VIEW, A.CREATE, A.APPROVE]),
+    ...pids("payments", "payment_otp", [A.REQUIRE]),
     ...pids("requests", "prefund_requests", [A.VIEW, A.APPROVE]),
     ...pids("requests", "transfer_account_requests", [A.VIEW, A.APPROVE]),
     ...pids("reports", "reports", [A.VIEW, A.EXPORT]),
@@ -252,6 +254,7 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     ...pids("payments", "transactions", [A.VIEW, A.EXPORT]),
     ...pids("payments", "transaction_requests", [A.VIEW, A.CREATE]),
     ...pids("payments", "transfers", [A.VIEW]),
+    ...pids("payments", "payment_otp", [A.REQUIRE]),
     ...pids("requests", "prefund_requests", [A.VIEW, A.CREATE]),
     ...pids("requests", "transfer_account_requests", [A.VIEW, A.CREATE]),
     ...pids("reports", "reports", [A.VIEW]),

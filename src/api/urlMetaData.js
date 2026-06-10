@@ -10,6 +10,7 @@ export const API_URL = {
   USERS: "/users",
   USERS_KYC_UPDATE: "/users/kyc",
   USERS_UPDATE_STATUS: "/users/update/status",
+  USERS_UPDATE_ROLE: "/users/update/role",
   USERS_STATS: "/users/statistics",
 
   // accounts

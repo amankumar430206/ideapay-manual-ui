@@ -11,7 +11,7 @@ import {
 } from "../../api/api-service";
 import { CURRENCIES } from "../../consts/formValues";
 import { ROLES } from "../../consts/AppRoles";
-import { OTP_BYPASS_PERMISSION } from "../../consts/Permissions";
+import { OTP_REQUIRE_PERMISSION } from "../../consts/Permissions";
 
 const SectionLabel = ({ children }) => (
   <>
@@ -28,11 +28,12 @@ export const ClientTransactionRequestForm = ({ onClose }) => {
   const currentUser = useSelector((s) => s.auth.currentUser);
   const permissions = useSelector((s) => s.auth.permissions);
 
-  // A role skips payment OTP only if it's SUPER or explicitly granted bypass.
-  const canBypassOtp =
-    currentUser?.role === ROLES.SUPER ||
-    (Array.isArray(permissions) && permissions.includes(OTP_BYPASS_PERMISSION));
-  const requiresOtp = !canBypassOtp;
+  // OTP is required only when the role has the "Require OTP" permission checked.
+  // SUPER never needs OTP. Unchecked/absent => OTP bypassed.
+  const requiresOtp =
+    currentUser?.role !== ROLES.SUPER &&
+    Array.isArray(permissions) &&
+    permissions.includes(OTP_REQUIRE_PERMISSION);
 
   // "form" → fill details, "verify" → enter emailed OTP
   const [step, setStep] = useState("form");

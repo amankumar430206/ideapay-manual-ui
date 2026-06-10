@@ -8,7 +8,8 @@ import { Section } from "../../components/Section";
 import { Button } from "../../components/buttons/Button";
 import { Data, Row, Table } from "../../components/table/table";
 import { StatusBadge } from "../../components/utils/StatusBadge";
-import { Can } from "../../components/permission/Can";
+import { OnlyFor } from "../../components/Roles";
+import { ROLES } from "../../consts/AppRoles";
 import { DATE_FORMAT } from "../../consts/AppContants";
 import { formatAmount } from "../../utils/utils";
 
@@ -158,10 +159,7 @@ const RequestTransactionsPage = () => {
               </Data>
 
               <Data>
-                <Can
-                  perm="payments.transaction_requests.approve"
-                  fallback={<span className="text-muted small">—</span>}
-                >
+                <OnlyFor roles={[ROLES.SUPER, ROLES.ADMIN]}>
                   <div className="d-flex gap-2">
                     <Button
                       className="btn btn-success btn-sm px-3"
@@ -176,7 +174,7 @@ const RequestTransactionsPage = () => {
                       onClick={() => handleAction(item._id, "rejected")}
                     />
                   </div>
-                </Can>
+                </OnlyFor>
               </Data>
             </Row>
           ))}

@@ -29,6 +29,7 @@ import AddAccountDrawer from "../accounts/actions/AddAccountDrawer";
 import AddTransactionDrawer from "./actions/AddTransactionDrawer";
 import UserRegisterDrawer from "./actions/UserOnboardDrawer";
 import ViewUserDrawer from "./actions/ViewUserDrawer";
+import ChangeRoleDrawer from "./actions/ChangeRoleDrawer";
 
 const filterOptions = [
   {
@@ -61,6 +62,7 @@ const Page = () => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
+  const [isChangeRoleOpen, setIsChangeRoleOpen] = useState(false);
 
   const query = useQuery({
     queryKey: ["users/list", filter.value, searchQuery],
@@ -287,6 +289,15 @@ const Page = () => {
                           handleStatusUpdate(item._id, STATUS_ENUMS.BLOCKED);
                         },
                       },
+                      {
+                        name: "Change Role",
+                        // Only super admin can change a user's role
+                        show: currentUser?.role === ROLES.SUPER,
+                        onClick: () => {
+                          setCurrentRecord(item);
+                          setIsChangeRoleOpen(true);
+                        },
+                      },
                     ]}
                   />
                 </Data>
@@ -323,6 +334,16 @@ const Page = () => {
           data={currentRecord}
           onClose={() => {
             setIsViewOpen(false);
+          }}
+        />
+      )}
+
+      {isChangeRoleOpen && (
+        <ChangeRoleDrawer
+          data={currentRecord}
+          onClose={(didChange) => {
+            setIsChangeRoleOpen(false);
+            if (didChange) query.refetch();
           }}
         />
       )}
