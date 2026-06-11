@@ -39,6 +39,12 @@ const RequestTransactionsPage = () => {
     approveMutation.mutate({ transactionId: id, status: status.toLowerCase() });
   };
 
+  // Only the row + action actually clicked should show the loading spinner.
+  const isActing = (id, status) =>
+    approveMutation.isPending &&
+    approveMutation.variables?.transactionId === id &&
+    approveMutation.variables?.status === status;
+
   return (
     <PageContent>
       <Section>
@@ -164,13 +170,15 @@ const RequestTransactionsPage = () => {
                     <Button
                       className="btn btn-success btn-sm px-3"
                       text="Approve"
-                      loading={approveMutation.isPending}
+                      loading={isActing(item._id, "approved")}
+                      disabled={approveMutation.isPending}
                       onClick={() => handleAction(item._id, "approved")}
                     />
                     <Button
                       className="btn btn-outline-danger btn-sm px-3"
                       text="Reject"
-                      loading={approveMutation.isPending}
+                      loading={isActing(item._id, "rejected")}
+                      disabled={approveMutation.isPending}
                       onClick={() => handleAction(item._id, "rejected")}
                     />
                   </div>

@@ -3,19 +3,29 @@ import { format } from "date-fns";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { fetchAccountStats, fetchTransactionRequests, fetchUserAccounts } from "../../api/api-service";
+import {
+  fetchAccountStats,
+  fetchTransactionRequests,
+  fetchUserAccounts,
+  updateTransactionRequestStatus,
+} from "../../api/api-service";
 import { PageContent } from "../../components/PageContent";
 import { Section } from "../../components/Section";
 import { Button } from "../../components/buttons/Button";
 import { StatsCard } from "../../components/cards/statsCard";
 import { Data, Row, Table } from "../../components/table/table";
 import { DATE_FORMAT } from "../../consts/AppContants";
+import { ROLES } from "../../consts/AppRoles";
 import { formatAmount } from "../../utils/utils";
 import RequestTransactionDrawer from "../accounts/actions/RequestTransactionDrawer";
 
 const ClientDashboard = () => {
   const currentUser = useSelector((s) => s.auth.currentUser);
   const [isRequestOpen, setIsRequestOpen] = useState(false);
+
+  // Staff (admin / super) see ALL pending requests and can approve/reject,
+  // just like the dedicated Transaction Requests page. Clients see their own.
+  const isStaff = currentUser?.role === ROLES.SUPER || currentUser?.role === ROLES.ADMIN;
 
   const statsQuery = useQuery({
     queryKey: ["accounts/stats", currentUser?._id],
@@ -29,15 +39,32 @@ const ClientDashboard = () => {
   });
 
   const requestsQuery = useQuery({
-    queryKey: ["transaction-requests/client", currentUser?._id],
+    queryKey: ["transaction-requests/dashboard", currentUser?._id, isStaff],
     queryFn: () =>
       fetchTransactionRequests({
-        query: { requestedBy: currentUser?._id },
-        populate: ["senderAccountId"],
+        query: isStaff ? { status: "pending" } : { requestedBy: currentUser?._id },
+        populate: ["senderAccountId", "requestedBy"],
         limit: 50,
       }),
     enabled: !!currentUser?._id,
   });
+
+  const statusMutation = useMutation({
+    mutationFn: updateTransactionRequestStatus,
+    onSuccess: (res) => {
+      toast(res.message || "Request updated", { type: "success" });
+      requestsQuery.refetch();
+    },
+    onError: () => toast("Failed to update request", { type: "error" }),
+  });
+
+  const handleRequestAction = (id, status) => statusMutation.mutate({ transactionId: id, status });
+
+  // Only the row + action actually clicked should show the loading spinner.
+  const isActing = (id, status) =>
+    statusMutation.isPending &&
+    statusMutation.variables?.transactionId === id &&
+    statusMutation.variables?.status === status;
 
   const stats = statsQuery.data?.content;
   const accounts = accountsQuery.data?.content || [];
@@ -170,16 +197,30 @@ const ClientDashboard = () => {
         <div className="d-flex justify-content-between align-items-center mb-3">
           <div>
             <h6 className="fw-semibold mb-0">Transaction Requests</h6>
-            <p className="text-muted small mb-0">Debit requests being processed</p>
+            <p className="text-muted small mb-0">
+              {isStaff ? "Debit requests pending approval" : "Debit requests being processed"}
+            </p>
           </div>
           {pendingCount > 0 && (
-            <span className="badge bg-warning text-dark px-3 py-2">{pendingCount} processing</span>
+            <span className="badge bg-warning text-dark px-3 py-2">
+              {pendingCount} {isStaff ? "pending" : "processing"}
+            </span>
           )}
         </div>
 
         <Table
           loading={requestsQuery.isLoading}
-          cols={["date", "transaction id", "account", "amount", "fee", "net", "payee", "description"]}
+          cols={[
+            "date",
+            "transaction id",
+            "account",
+            "amount",
+            "fee",
+            "net",
+            "payee",
+            "description",
+            ...(isStaff ? ["actions"] : []),
+          ]}
           dataSize={requests.length}
         >
           {requests.map((item) => (
@@ -191,7 +232,14 @@ const ClientDashboard = () => {
               </Data>
 
               <Data>
-                <span className="text-primary fw-semibold user-select-all small">{item.transactionId || "—"}</span>
+                <span className="text-primary fw-semibold user-select-all small d-block">
+                  {item.transactionId || "—"}
+                </span>
+                {isStaff && item.requestedBy && (
+                  <span className="text-muted small">
+                    by {item.requestedBy.firstName} {item.requestedBy.lastName}
+                  </span>
+                )}
               </Data>
 
               <Data>
@@ -240,6 +288,27 @@ const ClientDashboard = () => {
                   {item.description || "—"}
                 </span>
               </Data>
+
+              {isStaff && (
+                <Data>
+                  <div className="d-flex gap-2">
+                    <Button
+                      className="btn btn-success btn-sm px-3"
+                      text="Approve"
+                      loading={isActing(item._id, "approved")}
+                      disabled={statusMutation.isPending}
+                      onClick={() => handleRequestAction(item._id, "approved")}
+                    />
+                    <Button
+                      className="btn btn-outline-danger btn-sm px-3"
+                      text="Reject"
+                      loading={isActing(item._id, "rejected")}
+                      disabled={statusMutation.isPending}
+                      onClick={() => handleRequestAction(item._id, "rejected")}
+                    />
+                  </div>
+                </Data>
+              )}
             </Row>
           ))}
         </Table>
